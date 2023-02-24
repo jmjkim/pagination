@@ -6,6 +6,7 @@ import ListPaginationContextProvider, { usePaginationContext } from './list-pagi
 describe('ListPaginationContextProvider', () => {
   const NaiveList = (props) => {
     const { pagination, setNextPage } = usePaginationContext();
+
     return (
       <div>
         <span>{`currentPage: ${pagination.currentPage}`}</span>
@@ -16,7 +17,7 @@ describe('ListPaginationContextProvider', () => {
     );
   };
 
-  it.skip('should return currentPage, totalPages, pageSize and view more button', () => {
+  it('should return currentPage, totalPages, pageSize and view more button', () => {
     const { getByText } = render(
       <ListPaginationContextProvider
         value={{
@@ -35,24 +36,24 @@ describe('ListPaginationContextProvider', () => {
     expect(getByText('view more')).not.toBeNull();
   });
 
-  it.skip('should return currentPage, totalPages, pageSize and view more button', () => {
-    const { getByText } = render(
-      <ListPaginationContextProvider
-        value={{
-          total: 4,
-          currentPage: 0,
-          perPage: 2,
-        }}
-      >
-        <NaiveList />
-      </ListPaginationContextProvider>,
-    );
+  // it('should return currentPage, totalPages, pageSize and view more button', () => {
+  //   const { getByText } = render(
+  //     <ListPaginationContextProvider
+  //       value={{
+  //         total: 4,
+  //         currentPage: 0,
+  //         perPage: 2,
+  //       }}
+  //     >
+  //       <NaiveList />
+  //     </ListPaginationContextProvider>,
+  //   );
 
-    fireEvent.click(getByText('view more'));
+  //   fireEvent.click(getByText('view more'));
 
-    expect(getByText('currentPage: 1')).not.toBeNull();
-    expect(getByText('totalPages: 2')).not.toBeNull();
-    expect(getByText('pageSize: 2')).not.toBeNull();
-    expect(screen.queryByText('view more')).toBeNull();
-  });
+  //   expect(getByText('currentPage: 1')).not.toBeNull();
+  //   expect(getByText('totalPages: 2')).not.toBeNull();
+  //   expect(getByText('pageSize: 2')).not.toBeNull();
+  //   expect(screen.queryByText('view more')).toBeNull();
+  // });
 });
