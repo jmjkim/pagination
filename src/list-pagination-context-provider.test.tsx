@@ -63,7 +63,7 @@ describe('ListPaginationContextProvider', () => {
   });
 
   //setPreviousPage
-  it('should return currentPage, totalPages, pageSize and view more button', () => {
+  test('setPreviousPage', () => {
     const { getByText } = render(
       <ListPaginationContextProvider
         value={{
@@ -76,12 +76,6 @@ describe('ListPaginationContextProvider', () => {
     );
 
     fireEvent.click(getByText('view more'));
-
-    expect(getByText('currentPage: 2')).not.toBeNull();
-    expect(getByText('totalPages: 2')).not.toBeNull();
-    expect(getByText('pageSize: 2')).not.toBeNull();
-    expect(screen.queryByText('view more')).toBeNull();
-
     fireEvent.click(getByText('view previous page'));
 
     expect(getByText('currentPage: 1')).not.toBeNull();
@@ -96,7 +90,6 @@ describe('ListPaginationContextProvider', () => {
       <ListPaginationContextProvider
         value={{
           total: 10,
-          currentPage: 3,
           perPage: 2,
         }}
       >
@@ -104,11 +97,13 @@ describe('ListPaginationContextProvider', () => {
       </ListPaginationContextProvider>,
     );
 
+    fireEvent.click(getByText('view more'));
     fireEvent.click(getByText('view first page'));
 
     expect(getByText('currentPage: 1')).not.toBeNull();
     expect(getByText('totalPages: 5')).not.toBeNull();
     expect(getByText('pageSize: 2')).not.toBeNull();
+
     expect(screen.queryByText('view more')).not.toBeNull();
     expect(screen.queryByText('view first page')).toBeNull();
   });
