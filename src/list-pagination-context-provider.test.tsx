@@ -1,26 +1,30 @@
 import * as React from 'react';
 import expect from 'expect';
-import { screen, render, fireEvent, queryByText } from '@testing-library/react';
+import { screen, render, fireEvent } from '@testing-library/react';
 import ListPaginationContextProvider, { usePaginationContext } from './list-pagination-context-provider';
 
 describe('ListPaginationContextProvider', () => {
   const NaiveList = (props) => {
     const { pagination, setNextPage, setPrevPage, setFirstPage } = usePaginationContext();
 
-    return (
-      <div>
-        <span>{`currentPage: ${pagination.currentPage}`}</span>
-        <span>{`totalPages: ${pagination.totalPages}`}</span>
-        <span>{`pageSize: ${pagination.pageSize}`}</span>
-        {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
-        {pagination.previousEnabled && (
-          <>
-            <button onClick={setPrevPage}>view previous page</button>
-            <button onClick={setFirstPage}>view first page</button>
-          </>
-        )}
-      </div>
-    );
+    if (pagination.totalItems === 0 || pagination.totalPages === Infinity) {
+      return <div>No items to display</div>;
+    } else {
+      return (
+        <div>
+          <span>{`currentPage: ${pagination.currentPage}`}</span>
+          <span>{`totalPages: ${pagination.totalPages}`}</span>
+          <span>{`pageSize: ${pagination.pageSize}`}</span>
+          {pagination.nextEnabled && <button onClick={setNextPage}>view more</button>}
+          {pagination.previousEnabled && (
+            <>
+              <button onClick={setPrevPage}>view previous page</button>
+              <button onClick={setFirstPage}>view first page</button>
+            </>
+          )}
+        </div>
+      );
+    }
   };
 
   it('should return currentPage, totalPages, pageSize and view more button', () => {
@@ -41,8 +45,7 @@ describe('ListPaginationContextProvider', () => {
     expect(getByText('view more')).not.toBeNull();
   });
 
-  //setNextPage
-  it('should return currentPage, totalPages, pageSize and view more button', () => {
+  it('should move to the next page if view more button is clicked', () => {
     const { getByText } = render(
       <ListPaginationContextProvider
         value={{
@@ -62,8 +65,7 @@ describe('ListPaginationContextProvider', () => {
     expect(screen.queryByText('view more')).toBeNull();
   });
 
-  //setPreviousPage
-  test('setPreviousPage', () => {
+  it('should move back to the previous page if view previous page button is clicked', () => {
     const { getByText } = render(
       <ListPaginationContextProvider
         value={{
@@ -84,8 +86,7 @@ describe('ListPaginationContextProvider', () => {
     expect(screen.queryByText('view previous page')).toBeNull();
   });
 
-  //setFirstPage
-  it('should return currentPage, totalPages, pageSize and view more button', () => {
+  it('should move to the first page if view first page button is clicked', () => {
     const { getByText } = render(
       <ListPaginationContextProvider
         value={{
@@ -106,5 +107,87 @@ describe('ListPaginationContextProvider', () => {
 
     expect(screen.queryByText('view more')).not.toBeNull();
     expect(screen.queryByText('view first page')).toBeNull();
+  });
+
+  describe('edge cases', () => {
+    const maxNumber = Number.MAX_SAFE_INTEGER;
+
+    it('should return maximum totalPages and view more button', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: maxNumber,
+            perPage: 1,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText(`totalPages: ${maxNumber}`)).not.toBeNull();
+      expect(getByText('view more')).not.toBeNull();
+    });
+
+    it('should return maximum item numbers on a page', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: maxNumber,
+            perPage: maxNumber,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText('totalPages: 1')).not.toBeNull();
+      expect(getByText(`pageSize: ${maxNumber}`)).not.toBeNull();
+    });
+
+    it('should return positive numbers for both totalPages and perPage', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: -4,
+            perPage: -2,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText('currentPage: 1')).not.toBeNull();
+      expect(getByText('totalPages: 2')).not.toBeNull();
+    });
+
+    it('should display an error if totalItem is 0', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: 0,
+            perPage: 2,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText('No items to display')).not.toBeNull();
+    });
+
+    it('should display an error if perPage is 0', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: 2,
+            perPage: 0,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText('No items to display')).not.toBeNull();
+    });
   });
 });

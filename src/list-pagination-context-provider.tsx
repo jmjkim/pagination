@@ -128,8 +128,8 @@ const ListPaginationContextProvider: FCC<{ value: ListPaginationContextProps }> 
 
   React.useEffect(() => {
     setPagination({
-      pageSize: value.perPage,
-      totalItems: value.total,
+      pageSize: Math.abs(value.perPage),
+      totalItems: Math.abs(value.total),
     });
   }, [value]);
 
