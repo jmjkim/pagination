@@ -7,8 +7,13 @@ describe('ListPaginationContextProvider', () => {
   const NaiveList = (props) => {
     const { pagination, setNextPage, setPrevPage, setFirstPage } = usePaginationContext();
 
-    if (pagination.totalItems === 0 || pagination.totalPages === Infinity) {
+    const noItemError = pagination.totalItems === 0 || pagination.totalPages === Infinity;
+    const negativeValueError = Math.sign(pagination.pageSize) === -1 || Math.sign(pagination.totalPages) === -1;
+
+    if (noItemError) {
       return <div>No items to display</div>;
+    } else if (negativeValueError) {
+      return <div>invalid value error</div>;
     } else {
       return (
         <div>
@@ -144,11 +149,26 @@ describe('ListPaginationContextProvider', () => {
       expect(getByText(`pageSize: ${maxNumber}`)).not.toBeNull();
     });
 
-    it('should return positive numbers for both totalPages and perPage', () => {
+    it('should display an error if totalPages is negative', () => {
       const { getByText } = render(
         <ListPaginationContextProvider
           value={{
             total: -4,
+            perPage: 2,
+          }}
+        >
+          <NaiveList />
+        </ListPaginationContextProvider>,
+      );
+
+      expect(getByText('invalid value error')).not.toBeNull();
+    });
+
+    it('should display an error if perPage is negative', () => {
+      const { getByText } = render(
+        <ListPaginationContextProvider
+          value={{
+            total: 4,
             perPage: -2,
           }}
         >
@@ -156,8 +176,7 @@ describe('ListPaginationContextProvider', () => {
         </ListPaginationContextProvider>,
       );
 
-      expect(getByText('currentPage: 1')).not.toBeNull();
-      expect(getByText('totalPages: 2')).not.toBeNull();
+      expect(getByText('invalid value error')).not.toBeNull();
     });
 
     it('should display an error if totalItem is 0', () => {
